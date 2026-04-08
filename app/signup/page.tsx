@@ -7,6 +7,7 @@ import styles from '../login/login.module.css'
 export default function SignupPage() {
   const [fullName, setFullName] = useState('')
   const [email, setEmail] = useState('')
+  const [phone, setPhone] = useState('')
   const [password, setPassword] = useState('')
   const [confirm, setConfirm] = useState('')
   const [error, setError] = useState('')
@@ -27,7 +28,7 @@ export default function SignupPage() {
       const res = await fetch('/api/auth/signup', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ fullName, email, password }),
+        body: JSON.stringify({ fullName, email, phone, password }),
       })
       const data = await res.json()
       if (!res.ok) { setError(data.error ?? 'Signup failed'); return }
@@ -83,6 +84,17 @@ export default function SignupPage() {
               autoComplete="email"
               required
               placeholder="you@example.com"
+            />
+
+            <label className={styles.label}>Mobile Number</label>
+            <input
+              type="tel"
+              className={styles.input}
+              value={phone}
+              onChange={e => setPhone(e.target.value)}
+              autoComplete="tel"
+              required
+              placeholder="(555) 555-5555"
             />
 
             <label className={styles.label}>Password</label>

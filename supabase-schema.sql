@@ -8,6 +8,7 @@ create table if not exists public.profiles (
   name          text not null default '',
   license       text not null default '',
   role          text not null default 'student' check (role in ('student', 'admin')),
+  phone_number  text,
   mfa_enrolled  boolean not null default false,
   created_at    timestamptz not null default now()
 );
@@ -30,11 +31,12 @@ create policy "Service role full access"
 create or replace function public.handle_new_user()
 returns trigger language plpgsql security definer as $$
 begin
-  insert into public.profiles (id, email, name)
+  insert into public.profiles (id, email, name, phone_number)
   values (
     new.id,
     new.email,
-    coalesce(new.raw_user_meta_data->>'full_name', split_part(new.email, '@', 1))
+    coalesce(new.raw_user_meta_data->>'full_name', split_part(new.email, '@', 1)),
+    new.raw_user_meta_data->>'phone_number'
   );
   return new;
 end;

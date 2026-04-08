@@ -2,9 +2,9 @@ import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 
 export async function POST(req: Request) {
-  const { fullName, email, password } = await req.json()
+  const { fullName, email, phone, password } = await req.json()
 
-  if (!fullName || !email || !password) {
+  if (!fullName || !email || !phone || !password) {
     return NextResponse.json({ error: 'All fields are required' }, { status: 400 })
   }
 
@@ -22,7 +22,7 @@ export async function POST(req: Request) {
     email,
     password,
     email_confirm: true,
-    user_metadata: { full_name: fullName },
+    user_metadata: { full_name: fullName, phone_number: phone },
   })
 
   if (error) {
