@@ -1,0 +1,142 @@
+'use client'
+
+import { useState } from 'react'
+import styles from './login.module.css'
+
+type Step = 'credentials' | 'mfa'
+
+export default function LoginPage() {
+  const [step, setStep] = useState<Step>('credentials')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [code, setCode] = useState('')
+  const [factorId, setFactorId] = useState('')
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
+
+  async function handleLogin(e: React.FormEvent) {
+    e.preventDefault()
+    setError('')
+    setLoading(true)
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      })
+      const data = await res.json()
+      if (!res.ok) { setError(data.error ?? 'Login failed'); return }
+
+      if (data.mfa_enrolled) {
+        // Get factor ID for MFA challenge
+        const { createClient } = await import('@/lib/supabase')
+        const supabase = createClient()
+        const { data: factors } = await supabase.auth.mfa.listFactors()
+        const totp = factors?.totp?.[0]
+        if (totp) { setFactorId(totp.id); setStep('mfa') }
+        else { window.location.href = '/setup-mfa' }
+      } else {
+        window.location.href = '/setup-mfa'
+      }
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  async function handleMFA(e: React.FormEvent) {
+    e.preventDefault()
+    setError('')
+    setLoading(true)
+    try {
+      const res = await fetch('/api/auth/verify-mfa', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ factorId, code }),
+      })
+      const data = await res.json()
+      if (!res.ok) { setError(data.error ?? 'Invalid code'); return }
+      window.location.href = '/dashboard'
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <div className={styles.shell}>
+      <div className={styles.card}>
+        <div className={styles.logo}>
+          <span className={styles.logoMark}>⚡</span>
+          <div>
+            <div className={styles.logoName}>Short Stop Electrical</div>
+            <div className={styles.logoCourse}>WA Electrical CE</div>
+          </div>
+        </div>
+
+        {step === 'credentials' ? (
+          <form onSubmit={handleLogin} className={styles.form}>
+            <h1 className={styles.title}>Sign In</h1>
+            <p className={styles.subtitle}>Access your continuing education course</p>
+
+            <label className={styles.label}>Email</label>
+            <input
+              type="email"
+              className={styles.input}
+              value={email}
+              onChange={e => setEmail(e.target.value)}
+              autoComplete="email"
+              required
+              placeholder="you@example.com"
+            />
+
+            <label className={styles.label}>Password</label>
+            <input
+              type="password"
+              className={styles.input}
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              autoComplete="current-password"
+              required
+              placeholder="••••••••"
+            />
+
+            {error && <p className={styles.error}>{error}</p>}
+
+            <button type="submit" className={styles.btn} disabled={loading}>
+              {loading ? 'Signing in…' : 'Continue →'}
+            </button>
+          </form>
+        ) : (
+          <form onSubmit={handleMFA} className={styles.form}>
+            <h1 className={styles.title}>Two-Factor Auth</h1>
+            <p className={styles.subtitle}>Enter the 6-digit code from your authenticator app</p>
+
+            <label className={styles.label}>Authentication Code</label>
+            <input
+              type="text"
+              inputMode="numeric"
+              pattern="[0-9]{6}"
+              maxLength={6}
+              className={styles.input}
+              value={code}
+              onChange={e => setCode(e.target.value.replace(/\D/g, ''))}
+              autoComplete="one-time-code"
+              required
+              placeholder="000000"
+              autoFocus
+            />
+
+            {error && <p className={styles.error}>{error}</p>}
+
+            <button type="submit" className={styles.btn} disabled={loading}>
+              {loading ? 'Verifying…' : 'Verify →'}
+            </button>
+
+            <button type="button" className={styles.backBtn} onClick={() => { setStep('credentials'); setError(''); setCode('') }}>
+              ← Back
+            </button>
+          </form>
+        )}
+      </div>
+    </div>
+  )
+}
