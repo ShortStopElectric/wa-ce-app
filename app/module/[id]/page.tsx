@@ -2,16 +2,14 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { use } from 'react'
 import styles from './module.module.css'
 import { getModule } from '@/data/modules'
 import { PASS_THRESHOLD_MODULE } from '@/data/modules'
 
 type Phase = 'reading' | 'quiz' | 'result'
 
-export default function ModulePage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = use(params)
-  const moduleNum = parseInt(id)
+export default function ModulePage({ params }: { params: { id: string } }) {
+  const moduleNum = parseInt(params.id)
   const mod = getModule(moduleNum)
 
   const [phase, setPhase] = useState<Phase>('reading')
