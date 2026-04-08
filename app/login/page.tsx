@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 import styles from './login.module.css'
 
 type Step = 'credentials' | 'mfa'
@@ -135,6 +136,15 @@ export default function LoginPage() {
               ← Back
             </button>
           </form>
+        )}
+
+        {step === 'credentials' && (
+          <p style={{ textAlign: 'center', marginTop: 20, fontSize: 13, color: 'var(--gray-400)' }}>
+            No account?{' '}
+            <Link href="/signup" style={{ color: 'var(--amber)', textDecoration: 'none', fontWeight: 600 }}>
+              Create one
+            </Link>
+          </p>
         )}
       </div>
     </div>
