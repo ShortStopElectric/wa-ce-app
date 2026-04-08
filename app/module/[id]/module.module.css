@@ -173,8 +173,18 @@
 
 .resultActions { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
 
+.illustrationWrap {
+  margin: 24px 0;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px;
+  padding: 20px 16px;
+  overflow: hidden;
+}
+
 @media (max-width: 640px) {
   .header { flex-wrap: wrap; }
   .modTitle { font-size: 13px; }
   .resultScore { font-size: 44px; }
+  .illustrationWrap { padding: 12px 8px; }
 }

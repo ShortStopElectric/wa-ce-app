@@ -5,6 +5,7 @@ import Link from 'next/link'
 import styles from './module.module.css'
 import { getModule } from '@/data/modules'
 import { PASS_THRESHOLD_MODULE } from '@/data/modules'
+import { SECTION_ILLUSTRATIONS } from '@/components/illustrations/ModuleIllustrations'
 
 type Phase = 'reading' | 'quiz' | 'result'
 
@@ -85,6 +86,12 @@ export default function ModulePage({ params }: { params: { id: string } }) {
           </div>
 
           <p className={styles.sectionBody}>{section.body}</p>
+
+          {SECTION_ILLUSTRATIONS[section.id] && (
+            <div className={styles.illustrationWrap}>
+              {(() => { const Illus = SECTION_ILLUSTRATIONS[section.id]; return <Illus /> })()}
+            </div>
+          )}
 
           {section.points.length > 0 && (
             <ul className={styles.points}>
